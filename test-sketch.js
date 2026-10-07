@@ -1,34 +1,25 @@
-/* Create an animation where two rectangles that are initially offscreen are
-animated to enter the screen from the left-hand side. They should be
-moving at different speeds, and they should come to a stop just before
-exiting the screen. */
+// make a grid of filled squares where:
+// the upper left corner is black,
+// the upper right corner is pure red,
+// the lower left corner is pure blue,
+// the lower right corner is red and blue mixed,
+// and there are at least several shades in between.
 
-var frame_count = 0;
 function setup() {
-    createCanvas(800, 400);
+  createCanvas(250, 250);
+  background(255);
 }
-
+// i controls x; controls redness
+// j controls y; controls blueness
 function draw() {
-    background(138, 214, 142);
-    frame_count = frame_count + 1;
+  var nsw = 5; // Number of Squares desired across the Width of canvas
+  for (var i = 0; i < nsw; i = i + 1) {
+    for (var j = 0; j < nsw; j = j + 1) {
+      fill(0 + i*255/nsw, 0, 0, 255/2) // increasing redness as moves right
+      rect(0 + i*width/nsw, 0 + j*width/nsw, width/nsw, width/nsw);
 
-    var x1 = -40 + frame_count;
-    var x2 = (-40 + frame_count)*2;
-
-    if (x1 < 780) {
-        // rect1
-        fill(255);
-        rect(x1, 60, 20, 10);  
-    } else {
-        fill(255);
-        rect(780, 60, 20, 10);
+      fill(0, 0, 0 + j*255/nsw, 255/2); // increasing blueness as moves down
+      rect(0 + i*width/nsw, 0 + j*width/nsw, width/nsw, width/nsw);
     }
-    if (x2 < 780) {
-        //rect2
-        fill(255);
-        rect(x2, 250, 20, 10);   
-    } else {
-        fill(255);
-        rect(780, 250, 20, 10);
-    }
+  }
 }
