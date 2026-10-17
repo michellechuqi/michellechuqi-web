@@ -39,7 +39,6 @@ function setup() {
   // Only redraw the meteorites when the map moves, not every frame
   myMap.on('move', () => redraw());
   noLoop();
-  fill(70, 203, 31);
   stroke(100);
 }
 
@@ -62,6 +61,12 @@ function draw() {
       // in this file; 60,000,000 g is the largest (Hoba, in Namibia)
       let size = meteorites.getNum(i, 'mass (g)');
       size = map(size, 558, 60000000, 1, 25) + myMap.getZoom();
+      if (lat < 0) { // south of equator
+        fill(255, 165, 0); // orange
+      } else { // north of equator
+        fill(70, 203, 31); // green
+      }
+
       ellipse(pos.x, pos.y, size, size);
     }
   }
