@@ -1,0 +1,68 @@
+{
+  "version": 8,
+  "name": "Empty Style",
+  "metadata": {"maputnik:renderer": "mlgljs"},
+  "sources": {
+    "squamish": {
+      "type": "vector",
+      "url": "pmtiles://https://michellechuqi.github.io/michellechuqi-web/squamish.pmtiles"
+    },
+    "elevation": {
+      "type": "raster-dem",
+      "url": "pmtiles://https://michellechuqi.github.io/michellechuqi-web/squamish-elevation.pmtiles"
+    },
+    "imagery": {
+      "type": "raster",
+      "tiles": [
+        "https://tiles.maps.eox.at/wmts/1.0.0/s2cloudless-2024_3857/default/g/{z}/{y}/{x}.jpg"
+      ],
+      "minzoom": 0,
+      "maxzoom": 14,
+      "scheme": "xyz",
+      "tileSize": 256
+    }
+  },
+  "sprite": "",
+  "glyphs": "https://orangemug.github.io/font-glyphs/glyphs/{fontstack}/{range}.pbf",
+  "layers": [
+    {
+      "id": "imagery",
+      "type": "raster",
+      "source": "imagery",
+      "layout": {"visibility": "visible"},
+      "paint": {"raster-brightness-min": 0.35, "raster-saturation": -0.5}
+    },
+    {
+      "id": "dissemination-blocks",
+      "type": "fill",
+      "source": "squamish",
+      "source-layer": "dissemination_blocks",
+      "paint": {
+        "fill-opacity": 0.75,
+        "fill-color": {
+          "property": "density_km2",
+          "type": "interval",
+          "stops": [
+            [{"value": 0, "zoom": 10}, "rgba(0, 0, 0, 0.5)"],
+            [{"value": 400, "zoom": 10}, "#fdbe85"],
+            [{"value": 1500, "zoom": 10}, "#fd8d3c"],
+            [{"value": 3000, "zoom": 10}, "#e6550d"],
+            [{"value": 5000, "zoom": 10}, "#a63603"]
+          ]
+        }
+      }
+    },
+    {
+      "id": "hillshade",
+      "type": "hillshade",
+      "source": "elevation",
+      "layout": {"visibility": "visible"},
+      "paint": {
+        "hillshade-shadow-color": ["rgba(0, 0, 0, 0.5)"],
+        "hillshade-highlight-color": ["rgba(0, 0, 0, 0.5)"],
+        "hillshade-accent-color": "rgba(0, 0, 0, 0.5)"
+      }
+    }
+  ],
+  "id": "1xpcgo9"
+}

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Squamish: people per km² of land, 2021</title>
+  <link href="https://cdn.jsdelivr.net/npm/maplibre-gl@5.24.0/dist/maplibre-gl.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/maplibre-gl@5.24.0/dist/maplibre-gl.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/pmtiles@4.5.0/dist/pmtiles.js"></script>
+  <style>
+    body { margin: 0; }
+    #map { position: absolute; inset: 0; }
+    #legend { position: absolute; left: 10px; bottom: 30px;
+              width: 220px; padding: 8px; background: white; }
+    #bar { height: 14px; background: linear-gradient(to right,
+           rgba(253,174,107,0), #fdae6b 8%, #7f2704); }
+    #legend p { font-size: 11px; margin: 6px 0 0; }
+  </style>
+</head>
+<body>
+  <div id="map"></div>
+  <div id="legend">People per km² of land, 2021
+    <div id="bar"></div> 0 <span style="float: right">5,000 or more</span>
+    <p>Related layers: a hillshade of the slopes, from elevation, and satellite imagery from 2024.</p>
+    <p>Data: Statistics Canada, 2021 Census; BC Data Catalogue; Natural Resources Canada (MRDEM-30). Imagery: EOxCloudless (cloudless.eox.at) by EOX IT Services GmbH
+      (Contains modified Copernicus Sentinel data 2024).</p>
+  </div>
+  <script>
+    maplibregl.addProtocol('pmtiles', new pmtiles.Protocol().tile);
+    const map = new maplibregl.Map({
+      container: 'map',
+      style: 'squamish-style.json',
+      center: [-123.155, 49.73],
+      zoom: 11.5,
+      minZoom: 11,
+      maxBounds: [[-123.26, 49.64], [-123.05, 49.82]]
+    });
+  </script>
+</body>
+</html>
