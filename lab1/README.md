@@ -8,9 +8,10 @@ Since part of my question is about road infrastructure, I modified a basemap sty
 
 Cartographic principles:
 * visual contrast: the symbol colours for the health facilities stand out from the basemap colours and cannot be mistaken for vegetation or water body features.
-* legibility: even without a legend, the map is straightforward about what differently-coloured symbols mean: one colour represents hospitals, and the other represents ambulance stations.
+* legibility: even without a legend, the map is straightforward about what differently-coloured symbols mean: one colour represents hospitals, and the other represents ambulance stations. This is reinforced with the popups showing names that end with 'STATION' or 'HOSPITAL'.
 
 # Link to map:
 # From map critique session:
+A friend noted that a legend and info about the data sources would have made the map more useful for users. However, creating a legend is outside the 
 
 
