@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>For Exploratory Lab 1: Mapping health facilities in NSW, Australia</title>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/maplibre-gl@6.15.0/dist/maplibre-gl.css">
+    </head>
+    <body>
+        <div id="mapid" style="width: 1000px; height: 600px;"></div>
+        <script type="module">
+            // importing MapLibre library
+            import * as maplibregl from 'https://cdn.jsdelivr.net/npm/maplibre-gl@6.15.0/dist/maplibre-gl.mjs';
+            // the map will be stored inside variable 'map'
+            const map = new maplibregl.Map({ // keyword new makes a map, result is stored in const map
+                container: 'mapid', // refers to id in div block
+                center: [151.2024, -33.8762], // lon, lat of Sydney
+                zoom: 11,
+                style: 'https://raw.githubusercontent.com/michellechuqi/michellechuqi-web/main/lab1/lab1-style.json'   // basemap style modified from Maputnik
+                });
+            window.map = map; // so able to type map in console (?)
+
+            const url1 = 'https://raw.githubusercontent.com/michellechuqi/michellechuqi-web/main/lab1/nsw-hospitals.json';
+            const hospitalMarkerPaint = {
+                'circle-radius': ['interpolate', ['linear'], ['zoom'], 13, 6, 17, 10],
+                'circle-color': '#ec55fc', // orange
+                'circle-opacity': 0.6
+            };
+            map.on('load', function () {
+                map.addSource('hospitals', {
+                    type: 'geojson',
+                    data: url1,
+                    attribution: 'Hospitals in NSW'
+                    });
+                map.addLayer({
+                    id: 'hospitals-circles',
+                    type: 'circle',
+                    source: 'hospitals',
+                    paint: hospitalMarkerPaint
+                    });
+            function onEachHospital(e) {
+                const hospital = e.features[0].properties;
+                if (hospital.generalname) {
+                    const popup = new maplibregl.Popup();
+                    popup.setLngLat(e.lngLat);
+                    popup.setText(hospital.generalname);
+                    popup.addTo(map);
+                }
+            }
+            map.on('click', 'hospitals-circles', onEachHospital);
+            });
+
+            const url2 = 'https://raw.githubusercontent.com/michellechuqi/michellechuqi-web/main/lab1/nsw-ambulanceStations.json';
+            const ambulanceMarkerPaint = {
+                'circle-radius': ['interpolate', ['linear'], ['zoom'], 13, 6, 17, 10],
+                'circle-color': '#594bc4', // purple
+                'circle-opacity': 0.6
+            };   
+            map.on('load', function () {
+                map.addSource('ambulances', {
+                    type: 'geojson',
+                    data: url2,
+                    attribution: 'Ambulance stations in NSW'
+                    });
+                map.addLayer({
+                    id: 'ambulances-circles',
+                    type: 'circle',
+                    source: 'ambulances',
+                    paint: ambulanceMarkerPaint
+                    });
+            function onEachAmbulance(e) {
+                const ambulance = e.features[0].properties;
+                if (ambulance.generalname) {
+                    const popup = new maplibregl.Popup();
+                    popup.setLngLat(e.lngLat);
+                    popup.setText(ambulance.generalname);
+                    popup.addTo(map);
+                }
+            }
+            map.on('click', 'ambulances-circles', onEachAmbulance);
+            });     
+            </script>
+
+    </body>
+</html>
