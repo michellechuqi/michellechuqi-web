@@ -10,8 +10,8 @@ Cartographic principles:
 * visual contrast: the symbol colours for the health facilities stand out from the basemap colours and cannot be mistaken for vegetation or water body features.
 * legibility: even without a legend, the map is straightforward about what differently-coloured symbols mean: one colour represents hospitals, and the other represents ambulance stations. This is reinforced with the popups showing names that end with 'STATION' or 'HOSPITAL'.
 
-# Link to map:
+# Link to map: 
+https://michellechuqi.github.io/michellechuqi-web/lab1/index.html
+
 # From map critique session:
-A friend noted that a legend and info about the data sources would have made the map more useful for users. However, creating a legend is outside the 
-
-
+A friend noted that a legend and info about the data sources would have made the map more useful for users. However, creating a legend for categorical variables has not been taught in the course so far. Otherwise, she said the interactivity is a strength as one can gauge the density of the health facilities at smaller zooms and access more information through the popups. 
