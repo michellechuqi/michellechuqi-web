@@ -1,6 +1,5 @@
 {
-	"Hospital" : {
-		"type" : "FeatureCollection",
+	"type" : "FeatureCollection",
 		"features" : [
 			{
 				"type" : "Feature",
@@ -805,8 +804,7 @@
 					"processstate" : null,
 					"urbanity" : "U",
 					"createdate" : "20211125104341"
-				}
 			}
-		]
-	}
+		}
+	]
 }
