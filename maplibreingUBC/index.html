@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>MapLibre-ing UBC building entrances</title>
+    <!-- Load MapLibre's stylesheet (CSS). Its code (JavaScript) is loaded below, in the script. -->
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/maplibre-gl@6.15.0/dist/maplibre-gl.css"/>
+  </head>
+  <body>
+    <!-- The web map will go in this div element. -->
+    <div id="mapid" style="width: 600px; height: 400px;"></div>
+
+    <!-- Two buttons and a text box below the map. The buttons do nothing until JavaScript listens to them. -->
+    <div id="controls" style="margin: 15px;">
+      <button id="showAllEntrancesButton">Show All Entrances</button>
+      <span style="display: inline-block; width: 30px;"></span>
+      <input type="text" id="highlightEntrancesTextEntry" placeholder="e.g. 1">
+      <button id="highlightEntrancesButton">Highlight</button>
+    </div>
+
+    <script type="module">
+      // Load MapLibre's code (JavaScript). Version 6 is loaded as a module, with import.
+      import * as maplibregl from 'https://cdn.jsdelivr.net/npm/maplibre-gl@6.15.0/dist/maplibre-gl.mjs';
+
+      // Make a map with new maplibregl.Map(), and keep it in the variable map.
+      const map = new maplibregl.Map({
+        container: 'mapid',                  // the id of the div above
+        center: [-123.246, 49.259],          // [longitude, latitude] of UBC
+        zoom: 15,
+        style: 'https://tiles.openfreemap.org/styles/dark'   
+      });
+
+      window.map = map;
+
+      // The raw URL of the UBC building entrances file on GitHub.
+      const url = 'https://raw.githubusercontent.com/UBCGeodata/ubcv-locations/refs/heads/master/geojson/ubcv_main_entrances.geojson';
+
+      // Paint properties set how the layer draws each circle.
+      // They are kept in a variable called entranceMarkerPaint.
+      const entranceMarkerPaint = {
+        // A zoom expression: the radius depends on the map's zoom.
+        'circle-radius': ['interpolate', ['linear'], ['zoom'], 13, 3, 17, 9],
+        // A data-driven expression: the colour depends on each entrance's ACCESSIBLE value.
+        'circle-color': ['match', ['to-string', ['get', 'ACCESSIBLE']], // since ACCESSIBLE stored as ints
+                         '1', '#0ede4e', // YES, green
+                         '0', '#de360e', // NO, red
+                         '#b3b3b3'], // otherwise grey
+        'circle-opacity': 0.6
+      };
+
+      // popup function.
+      // e holds information about the click. e.features[0] is the feature (the entrance) that was clicked.
+      function onEachEntrance(e) {
+        // entrance holds that feature's attributes, such as ACCESSIBLE or BL_ID.
+        const entrance = e.features[0].properties;
+        // Does this entrance have accessibility information? If it does not, no popup opens.
+        if (entrance.ACCESSIBLE) {
+          const popup = new maplibregl.Popup();
+          popup.setLngLat(e.lngLat);
+          popup.setText(entrance.PLACENAME);
+          popup.addTo(map);
+        }
+      }
+
+      // addEntrances adds the source, the layer and the click listener. 
+      function addEntrances() {
+        // If the entrances are already on the map, stop here.
+        // MapLibre cannot add a second source with the same name.
+        if (map.getSource('entrances')) {
+          return;   // don't add entrances source twice
+        }
+        map.addSource('entrances', {
+          type: 'geojson',
+          data: url,
+          attribution: 'Main Entrances on UBC, UBCGeodata'
+        });
+        map.addLayer({
+          id: 'entrances-circles',
+          type: 'circle',
+          source: 'entrances',
+          paint: entranceMarkerPaint
+        });
+
+        map.on('click', 'entrances-circles', onEachEntrance);
+
+        // When the mouse moves over an entrance, MapLibre runs hoverEntrance.
+        // When the mouse leaves an entrance, MapLibre runs leaveEntrance.
+        map.on('mousemove', 'entrances-circles', hoverEntrance);
+        map.on('mouseleave', 'entrances-circles', leaveEntrance);
+      }
+
+      // draw every entrance.
+      function showAllEntrances() {
+        addEntrances();
+        // A filter of null means no filter: every entrance is drawn.
+        map.setFilter('entrances-circles', null);
+        map.setPaintProperty('entrances-circles', 'circle-color', entranceMarkerPaint['circle-color']);
+        map.setPaintProperty('entrances-circles', 'circle-opacity', entranceMarkerPaint['circle-opacity']);
+      }
+
+      // One popup, used again each time the mouse moves over a tree.
+      const hoverPopup = new maplibregl.Popup({ closeButton: false });
+
+      function hoverEntrance(e) {
+        const entrance = e.features[0].properties;
+        // an entrance with no accessibility info gets no popup.
+        if (entrance.PLACENAME) {
+          hoverPopup.setLngLat(e.features[0].geometry.coordinates);
+          hoverPopup.setText(entrance.PLACENAME);
+          hoverPopup.addTo(map);
+        } else {
+          hoverPopup.remove();
+        }
+      }
+
+      function leaveEntrance() {
+        hoverPopup.remove();
+      }
+
+      // Highlight: keep every entrance on the map. Colour the entrances whose ACCESSIBLE contains the text in the box.
+      function highlightEntrances() {
+        addEntrances();
+        // .value is the text that is in the box when the button is clicked.
+        const textEntry = document.getElementById('highlightEntrancesTextEntry');
+        const entranceToHighlight = textEntry.value;
+        if (entranceToHighlight === '') {
+          showAllEntrances();
+          return;
+        }
+        // No filter: every entrance is drawn.
+        map.setFilter('entrances-circles', null);
+        const matches = ['==', ['to-string', ['get', 'ACCESSIBLE']], entranceToHighlight];
+        // A case expression: MapLibre checks matches for each tree.
+        // If it is true, the entrance gets the first value. If it is false, the entrance gets the second value.
+        map.setPaintProperty('entrances-circles', 'circle-color', ['case', matches, '#e626eb', '#bbbbbb']);
+        map.setPaintProperty('entrances-circles', 'circle-opacity', ['case', matches, 0.9, 0.3]);
+      }
+
+      // Listen to the buttons only after the map's style has loaded.
+      map.on('load', function () {
+        // Two listeners: each button runs its own function when it is clicked.
+        // Write the function names without (). The browser runs them later, once for each click.
+        const showAllButton = document.getElementById('showAllEntrancesButton');
+        showAllButton.addEventListener('click', showAllEntrances);
+        const highlightButton = document.getElementById('highlightEntrancesButton');
+        highlightButton.addEventListener('click', highlightEntrances);
+      });
+
+    </script>
+  </body>
+</html>
