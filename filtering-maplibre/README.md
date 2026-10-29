@@ -1,0 +1,1 @@
+Data taken from the South Australian Government Data Directory: The Department for Infrastructure and Transport maintains a dataset called "Road Crash Locations in SA", wherein there is a .geojson file called "Road Crashes 2021-2025 (geojson)".
