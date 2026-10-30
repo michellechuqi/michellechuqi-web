@@ -27,7 +27,7 @@
       // Make a map with new maplibregl.Map(), and keep it in the variable map.
       const map = new maplibregl.Map({
         container: 'mapid',                  
-        center: [138.599, -34.934],          // [longitude, latitude] of Adelaide, South Australia
+        center: [138.599, -34.927],          // [longitude, latitude] of Adelaide, South Australia
         zoom: 15,
         style: 'https://tiles.openfreemap.org/styles/liberty'   
       });
@@ -40,7 +40,7 @@
       // paint of crash symbols
       const crashesPaint = {
         // zoom expression
-        'circle-radius': ['interpolate', ['linear'], ['zoom'], 13, 7, 17, 6],
+        'circle-radius': ['interpolate', ['linear'], ['zoom'], 13, 3, 17, 6],
         // colour depends on if crash had fatalities ('cse_fat' = 1) or not
         'circle-color': ['match', ['to-string', ['get', 'cse_fat']],
                           '1', '#d64627', // YES, red
