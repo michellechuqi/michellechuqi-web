@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Filtering MapLibre: Road crashes in South Australia</title>
+    <!-- Load MapLibre's stylesheet (CSS). Its code (JavaScript) is loaded below, in the script. -->
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/maplibre-gl@6.15.0/dist/maplibre-gl.css"/>
+  </head>
+  <body>
+    <!-- The web map will go in this div element. -->
+    <div id="mapid" style="width: 600px; height: 400px;"></div>
+    <div id="controls" style="margin:15px;">
+       <!-- a button -->
+      <button id="showAllCrashesButton">Show All Crashes</button>
+      <span style="display: inline-block; width: 30px;"></span>
+      <!-- a text entry box -->
+      <input type="text" id="highlightFatalitiesEntry" placeholder="0 or 1">
+      <button id="highlightFatalitiesButton">Highlight Fatality Status</button>
+    </div>
+
+    <script type="module">
+      // Load MapLibre's code (JavaScript). Version 6 is loaded as a module, with import.
+      import * as maplibregl from 'https://cdn.jsdelivr.net/npm/maplibre-gl@6.15.0/dist/maplibre-gl.mjs';
+
+      // Make a map with new maplibregl.Map(), and keep it in the variable map.
+      const map = new maplibregl.Map({
+        container: 'mapid',                  
+        center: [138.599, -34.934],          // [longitude, latitude] of Adelaide, South Australia
+        zoom: 12,
+        style: 'https://tiles.openfreemap.org/styles/liberty'   
+      });
+
+      window.map = map;
+
+      // raw url of crashes data
+      const url = 'https://raw.githubusercontent.com/michellechuqi/michellechuqi-web/main/filtering-maplibre/RoadCrashes_2021_2025_GDA2020.geojson';
+      
+      // paint of crash symbols
+      const crashesPaint = {
+        // zoom expression
+        'circle-radius': ['interpolate', ['linear'], ['zoom'], 13, 7, 17, 6],
+        // colour depends on if crash had fatalities ('cse_fat' = 1) or not
+        'circle-color': ['match', ['to-string', ['get', 'cse_fat']],
+                          '1', '#d64627', // YES, red
+                          '0', '#276bd6', // NO, blue
+                          '#a0bff0'], // otherwise light blue
+        'circle-opacity': 0.6
+      };
+
+      // adding crash data, simultaneously register hover popups
+      function addCrashes() {
+        if (map.getSource('crashes')) {
+          return;
+        };
+        map.addSource('crashes', {
+          type: 'geojson',
+          data: url,
+          attribution: 'Road Crash Locations in South Australia, 2021-2025. The Department for Infrastructure and Transport'
+        });
+        map.addLayer({
+          id: 'crash-circles',
+          type: 'circle',
+          source: 'crashes',
+          paint: crashesPaint
+        });
+
+        // (enter/leaveCrash are defined later)
+        map.on('mousemove', 'crash-circles', enterCrash);
+        map.on('mouseleave', 'crash-circles', leaveCrash);
+      }
+
+
+      // making popups
+      // make the popups appear and disappear when cursor hovers over a crash:
+      const hoverPopup = new maplibregl.Popup({ closeButton: false });
+      function enterCrash(event) {
+        const crash = event.features[0];
+        const coords = crash.geometry.coordinates;
+        const fatalities = crash.properties.total_fatalities;
+        hoverPopup.setLngLat(coords);
+        hoverPopup.setText(
+          // access these ($) and use in text
+          `Coordinates: ${coords}
+           Total Fatalities: ${fatalities}`
+        );
+        hoverPopup.addTo(map);
+      }
+      function leaveCrash() {
+        hoverPopup.remove();
+      }
+      // make popup when cursor clicks on a crash:
+      const click_popup = new maplibregl.Popup(); // but want closeButton: true
+      function onEachCrash(event) {
+        const crash = event.features[0];
+        const coords = crash.geometry.coordinates;
+        const fatalities = crash.properties.total_fatalities;
+        click_popup.setLngLat(coords);
+        click_popup.setText(
+          // access these ($) and use in text
+          `Coordinates: ${coords}
+           Total Fatalities: ${fatalities}`
+        );
+        click_popup.addTo(map)
+      }
+
+      // draw every crash in default colour scheme:
+      function showAllCrashes() {
+        addCrashes();
+        // reset any filters on the crash-circles layer:
+        map.setFilter('crash-circles', null);
+        // use default colour scheme on that layer:
+        map.setPaintProperty('crash-circles', 'circle-color', crashesPaint['circle-color']);
+        map.setPaintProperty('crash-circles', 'circle-opacity', crashesPaint['circle-opacity']);
+      }
+
+      // draw highlighted crashes with a different colour scheme
+      function highlightCrashes() {
+        addCrashes();
+        const textEntry = document.getElementById('highlightFatalitiesEntry');
+        const fatalityHighlighted = textEntry.value;
+        // what to do if entry is blank:
+        if (fatalityHighlighted === '') {
+          showAllCrashes();
+          return;
+        } // otherwise,
+        // reset any preexisting filters
+        map.setFilter('crash-circles', null);
+        // create condition
+        const match = ['in', fatalityHighlighted, ['to-string', ['get', 'total_fatalities']]];
+        // how to style if condition is met, if it is not met
+        map.setPaintProperty('crash-circles', 'circle-color', ['case', match, '#000000', '#a19990']);
+        map.setPaintProperty('crash-circles', 'circle-opacity', ['case', match, 0.9, 0.2]);
+      }
+
+      // order of displaying layers:
+      map.on('load', function () {
+        const showAllButton = document.getElementById('showAllCrashesButton');
+        showAllButton.addEventListener('click', showAllCrashes);
+        const highlightButton = document.getElementById('highlightFatalitiesButton');
+        highlightButton.addEventListener('click', highlightCrashes);
+      })
+      // also want popup when click:
+      map.on('click', 'crash-circles', onEachCrash);
+
+    </script>
+  </body>
+</html>
