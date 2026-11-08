@@ -3,7 +3,7 @@
 
   <head>
     <meta charset="utf-8" />
-    <title>Michelle Huang exploratory lab 2</title>
+    <title>Lab 2 Map: Conflicting territories in the South China Sea</title>
 
     <!-- Load MapLibre's stylesheet (CSS). Its code (JavaScript) is loaded below, in the script. -->
     <link
@@ -18,17 +18,18 @@
     <!-- div element for web map: -->
     <div id="mapid" style="width: 800px; height: 500px;"></div>
     <!-- div element for territory buttons -->
-    <div id="territory-buttons" style="
+    <div id="buttons" style="
         width: 800px;
         margin: 15px 0;
         display: flex;
         justify-content: space-between;
         gap: 10px;
         ">
-    <button id="china-territory">Declare China's territory</button>
-    <button id="vietnam-territory">Declare Vietnam's territory</button>
-    <button id="philippines-territory">Declare the Philippines' territory</button>
-</div>
+        <button id="china-territory">Declare China's territory</button>
+        <button id="vietnam-territory">Declare Vietnam's territory</button>
+        <button id="philippines-territory">Declare the Philippines' territory</button>
+        <button id="toggle-fill">Show Fill View</button>
+    </div>
     
 
     <script type="module">
@@ -36,23 +37,23 @@
       import * as maplibregl from 'https://cdn.jsdelivr.net/npm/maplibre-gl@6.15.0/dist/maplibre-gl.mjs';
 
 // Setting up the map
-      // The box that will hold the Voronoi cells: [west, south, east, north], in degrees.
-      const box = [86.6, -14, 140.8, 31.3]; // bounds around South China Sea
+      // the box that will hold the Voronoi cells: [west, south, east, north], in degrees.
+      const box = [86.6, -14, 140.8, 31.3]; // bounds around South China Sea, from Google Maps
       // westmost lon: 86.6
       // southmost lat: -14
       // eastmost lon: 140.8
       // northmost lat: 31.3
 
-      // Make a map with new maplibregl.Map(), and keep it in the variable map.
+      // make a map with new maplibregl.Map(), and keep it in the variable map.
       const map = new maplibregl.Map({
         container: 'mapid',                  // the id of the div above
         maxBounds: box,                      // the map cannot be moved outside the box
-        center: [115.3, 10.6],         // [longitude, latitude] of Spratly Islands
+        center: [115.3, 10.6],               // [longitude, latitude] of the contested Spratly Islands
         zoom: 5,
         style: 'https://styles.maptoolkit.org/light.json'   // a free style from maptoolkit
       });
 
-      // A module keeps its names to itself. This line lets you type map in the console under the code.
+      // a module keeps its names to itself. This line lets you type map in the console under the code.
       window.map = map;
 
 // Making arrays where new points are pushed into them
@@ -67,7 +68,7 @@
 
 // Wait for map style to load. Everything afterwards happens after style loads:
 map.on('load', function () {
-    // China's array is populated and has a style
+    // China's layer is populated and has a style, prepares for fill view
      map.addSource('china-cells', { 
         type: 'geojson',
         data: turf.featureCollection([]) // declare blank array
@@ -79,6 +80,18 @@ map.on('load', function () {
         paint: {
             'line-color': '#a877d1', // purple
             'line-width': 3
+        }
+    });
+    map.addLayer({
+        id: 'china-fill',
+        type: 'fill',
+        source: 'china-cells',
+        paint: {
+            'fill-color': '#a877d1',
+            'fill-opacity': 0.3
+        },
+        layout: {
+            visibility: 'none' // this layer is initially hidden
         }
     });
     map.addSource('china-points', {
@@ -109,6 +122,18 @@ map.on('load', function () {
             'line-width': 3
         }
     });
+    map.addLayer({
+        id: 'vietnam-fill',
+        type: 'fill',
+        source: 'vietnam-cells',
+        paint: {
+            'fill-color': '#d17777',
+            'fill-opacity': 0.3
+        },
+        layout: {
+            visibility: 'none' // this layer is initially hidden
+        }
+    });
     map.addSource('vietnam-points', {
         type: 'geojson',
         data: turf.featureCollection([])
@@ -122,6 +147,7 @@ map.on('load', function () {
             'circle-color': '#d17777'
         }
     });
+    
 
     // Philippines
     map.addSource('philippines-cells', { 
@@ -137,6 +163,18 @@ map.on('load', function () {
             'line-width': 3
         }
     });
+    map.addLayer({
+        id: 'philippines-fill',
+        type: 'fill',
+        source: 'philippines-cells',
+        paint: {
+            'fill-color': '#8cd177',
+            'fill-opacity': 0.3
+        },
+        layout: {
+            visibility: 'none' // this layer is initially hidden
+        }
+    });
     map.addSource('philippines-points', {
         type: 'geojson',
         data: turf.featureCollection([])
@@ -150,8 +188,9 @@ map.on('load', function () {
             'circle-color': '#8cd177'
         }
     });
+    
 
-    // What happens when button is clicked (listeners, change in country value)
+// What happens when button is clicked (listeners, change in country value)
     document.getElementById('china-territory').addEventListener('click', function() {
         country = 'china';
         console.log('China selected')
@@ -165,49 +204,88 @@ map.on('load', function () {
         console.log('the Philippines selected')
     });
 
-    // After clicking a button, clicking on a map pushes that point to an array:
+// After clicking a button, clicking on a map pushes that point to an array:
     map.on('click', function(e) {
         if (country === null) { // to prevent clicking on map without clicking on a country first
             console.log('Click on a country button first.');
             return;
         }
 
-        const aPoint = turf.point ([e.lngLat.lng, e.lngLat.lat]);
+        const aPoint = turf.point ([e.lngLat.lng, e.lngLat.lat], 
+                                   {country: country}); // make a property called countries
 
         if (country === 'china') {
-            clickedPointsChina.push(aPoint);
-            const chinaPoints = turf.featureCollection(clickedPointsChina);
-            map.getSource('china-points').setData(chinaPoints);
-            const chinaCells = turf.voronoi(chinaPoints, {bbox: box});
-            map.getSource('china-cells').setData(chinaCells);
+            clickedPointsChina.push(aPoint); // populate array
+            map.getSource('china-points').setData(turf.featureCollection(clickedPointsChina)); // update points layer
         } else if (country === 'vietnam') {
             clickedPointsVietnam.push(aPoint);
-            const vietnamPoints = turf.featureCollection(clickedPointsVietnam);
-            map.getSource('vietnam-points').setData(vietnamPoints);
-            const vietnamCells = turf.voronoi(vietnamPoints, {bbox: box});
-            map.getSource('vietnam-cells').setData(vietnamCells);
+            map.getSource('vietnam-points').setData(turf.featureCollection(clickedPointsVietnam));
         } else if (country === 'philippines') {
             clickedPointsPhilippines.push(aPoint);
-            const philippinesPoints = turf.featureCollection(clickedPointsPhilippines);
-            map.getSource('philippines-points').setData(philippinesPoints);
-            const philippinesCells = turf.voronoi(philippinesPoints, {bbox: box});
-            map.getSource('philippines-cells').setData(philippinesCells);
+            map.getSource('philippines-points').setData(turf.featureCollection(clickedPointsPhilippines));
         }
+
+        console.log(country + ': ' + [e.lngLat.lng, e.lngLat.lat]); // console shows coordinates
+
+// Making one Voronoi diagram with all points (regardless of their separate country identities)
+        const combinedArray = turf.featureCollection([
+            ...clickedPointsChina, // spread syntax (...) to make one array of all the points
+            ...clickedPointsVietnam,
+            ...clickedPointsPhilippines
+        ]);
+        const oneVoronoi = turf.voronoi(combinedArray, {bbox: box}); // make voronoi polygons
+
+// Preparation for filtering: making filter helper functions:
+        function checkChina(polygon, index) { // check each polygon if it belongs to china
+            if (combinedArray.features[index].properties.country === 'china') {
+                return true};
+            return false
+        };
+        function checkVietnam(polygon, index) {
+            if (combinedArray.features[index].properties.country === 'vietnam') {
+                return true};
+            return false
+        };
+        function checkPhilippines(polygon, index) {
+            if (combinedArray.features[index].properties.country === 'philippines') {
+                return true};
+            return false
+        };
+
+// Separating resulting polygons by their country identities + updating sources
+        const chinaPolygons = turf.featureCollection(
+            oneVoronoi.features.filter(checkChina));
+        const vietnamPolygons = turf.featureCollection(
+            oneVoronoi.features.filter(checkVietnam));
+        const philippinesPolygons = turf.featureCollection(
+            oneVoronoi.features.filter(checkPhilippines));
+        
+        map.getSource('china-cells').setData(chinaPolygons);
+        map.getSource('vietnam-cells').setData(vietnamPolygons);
+        map.getSource('philippines-cells').setData(philippinesPolygons);
+    
+    });
+
+// Responding to toggle button
+    let fillVisible = false;
+    document.getElementById('toggle-fill').addEventListener('click', function() { // when button is clicked,
+        if (fillVisible === false) { // if originally set to false,
+            map.setLayoutProperty('china-fill', 'visibility', 'visible'); // make fill layers visible
+            map.setLayoutProperty('vietnam-fill', 'visibility', 'visible');
+            map.setLayoutProperty('philippines-fill', 'visibility', 'visible');
+        
+            fillVisible = true; // update var's value
+            document.getElementById('toggle-fill').textContent = 'Hide Fill View'; // update button text
+        } else {
+            map.setLayoutProperty('china-fill', 'visibility', 'none'); // make fill layers invisible
+            map.setLayoutProperty('vietnam-fill', 'visibility', 'none');
+            map.setLayoutProperty('philippines-fill', 'visibility', 'none');
+        
+            fillVisible = false;
+            document.getElementById('toggle-fill').textContent = 'Show Fill View';
+
+    }});
 });
-
-
-});
-
-     
-    
-    
-
-    
-
-
-
-
-
     </script>
   </body>
 </html>
