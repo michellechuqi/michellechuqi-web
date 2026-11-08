@@ -14,7 +14,7 @@ In this exploratory lab, users first see the location of the Spratly Islands. Th
 Through turf.js' Voronoi polygons generation function, the territories extending from the user-determined points are calculated and can be visualised by clicking the Show Fill View button.
 
 ## Screenshot of map
-![Screenshot of map with example territories and fill view enabled.](lab2/map-screenshot.png)
+![Screenshot of map with example territories and fill view enabled.](map-screenshot.png)
 
 ## Link to map
 https://michellechuqi.github.io/michellechuqi-web/lab2/lab2-map.html
