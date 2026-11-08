@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset="utf-8" />
+    <title>Michelle Huang exploratory lab 2</title>
+
+    <!-- Load MapLibre's stylesheet (CSS). Its code (JavaScript) is loaded below, in the script. -->
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/maplibre-gl@6.15.0/dist/maplibre-gl.css"
+    />
+    <!-- Load Turf's code (JavaScript). After this line, the code on the page can use the name turf. -->
+    <script src="https://cdn.jsdelivr.net/npm/@turf/turf@7.4.0/turf.min.js"></script>
+  </head>
+
+  <body>
+    <!-- div element for web map: -->
+    <div id="mapid" style="width: 800px; height: 500px;"></div>
+    <!-- div element for territory buttons -->
+    <div id="territory-buttons" style="
+        width: 800px;
+        margin: 15px 0;
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+        ">
+    <button id="china-territory">Declare China's territory</button>
+    <button id="vietnam-territory">Declare Vietnam's territory</button>
+    <button id="philippines-territory">Declare the Philippines' territory</button>
+</div>
+    
+
+    <script type="module">
+      // Load MapLibre's code (JavaScript). Version 6 is loaded as a module, with import.
+      import * as maplibregl from 'https://cdn.jsdelivr.net/npm/maplibre-gl@6.15.0/dist/maplibre-gl.mjs';
+
+// Setting up the map
+      // The box that will hold the Voronoi cells: [west, south, east, north], in degrees.
+      const box = [86.6, -14, 140.8, 31.3]; // bounds around South China Sea
+      // westmost lon: 86.6
+      // southmost lat: -14
+      // eastmost lon: 140.8
+      // northmost lat: 31.3
+
+      // Make a map with new maplibregl.Map(), and keep it in the variable map.
+      const map = new maplibregl.Map({
+        container: 'mapid',                  // the id of the div above
+        maxBounds: box,                      // the map cannot be moved outside the box
+        center: [115.3, 10.6],         // [longitude, latitude] of Spratly Islands
+        zoom: 5,
+        style: 'https://styles.maptoolkit.org/light.json'   // a free style from maptoolkit
+      });
+
+      // A module keeps its names to itself. This line lets you type map in the console under the code.
+      window.map = map;
+
+// Making arrays where new points are pushed into them
+
+      // separate arrays for each of the three countries. 
+      const clickedPointsChina = [];
+      const clickedPointsVietnam = [];
+      const clickedPointsPhilippines = [];
+
+     // before a button is clicked, country is null (= 'no country')
+      let country = null;
+
+// Wait for map style to load. Everything afterwards happens after style loads:
+map.on('load', function () {
+    // China's array is populated and has a style
+     map.addSource('china-cells', { 
+        type: 'geojson',
+        data: turf.featureCollection([]) // declare blank array
+     });
+     map.addLayer({
+        id: 'china-line',
+        type: 'line',
+        source: 'china-cells',
+        paint: {
+            'line-color': '#a877d1', // purple
+            'line-width': 3
+        }
+    });
+    map.addSource('china-points', {
+        type: 'geojson',
+        data: turf.featureCollection([])
+    });
+    map.addLayer({
+        id: 'china-circles',
+        type: 'circle',
+        source: 'china-points',
+        paint: {
+            'circle-radius': 4,
+            'circle-color': '#a877d1'
+        }
+    });
+
+    // Vietnam
+    map.addSource('vietnam-cells', { 
+        type: 'geojson',
+        data: turf.featureCollection([]) // declare blank array
+     });
+     map.addLayer({
+        id: 'vietnam-line',
+        type: 'line',
+        source: 'vietnam-cells',
+        paint: {
+            'line-color': '#d17777', // red
+            'line-width': 3
+        }
+    });
+    map.addSource('vietnam-points', {
+        type: 'geojson',
+        data: turf.featureCollection([])
+    });
+    map.addLayer({
+        id: 'vietnam-circles',
+        type: 'circle',
+        source: 'vietnam-points',
+        paint: {
+            'circle-radius': 4,
+            'circle-color': '#d17777'
+        }
+    });
+
+    // Philippines
+    map.addSource('philippines-cells', { 
+        type: 'geojson',
+        data: turf.featureCollection([]) // declare blank array
+     });
+     map.addLayer({
+        id: 'philippines-line',
+        type: 'line',
+        source: 'philippines-cells',
+        paint: {
+            'line-color': '#8cd177', // green
+            'line-width': 3
+        }
+    });
+    map.addSource('philippines-points', {
+        type: 'geojson',
+        data: turf.featureCollection([])
+    });
+    map.addLayer({
+        id: 'philippines-circles',
+        type: 'circle',
+        source: 'philippines-points',
+        paint: {
+            'circle-radius': 4,
+            'circle-color': '#8cd177'
+        }
+    });
+
+    // What happens when button is clicked (listeners, change in country value)
+    document.getElementById('china-territory').addEventListener('click', function() {
+        country = 'china';
+        console.log('China selected')
+    });
+    document.getElementById('vietnam-territory').addEventListener('click', function() {
+        country = 'vietnam';
+        console.log('Vietnam selected')
+    });
+    document.getElementById('philippines-territory').addEventListener('click', function() {
+        country = 'philippines';
+        console.log('the Philippines selected')
+    });
+
+    // After clicking a button, clicking on a map pushes that point to an array:
+    map.on('click', function(e) {
+        if (country === null) { // to prevent clicking on map without clicking on a country first
+            console.log('Click on a country button first.');
+            return;
+        }
+
+        const aPoint = turf.point ([e.lngLat.lng, e.lngLat.lat]);
+
+        if (country === 'china') {
+            clickedPointsChina.push(aPoint);
+            const chinaPoints = turf.featureCollection(clickedPointsChina);
+            map.getSource('china-points').setData(chinaPoints);
+            const chinaCells = turf.voronoi(chinaPoints, {bbox: box});
+            map.getSource('china-cells').setData(chinaCells);
+        } else if (country === 'vietnam') {
+            clickedPointsVietnam.push(aPoint);
+            const vietnamPoints = turf.featureCollection(clickedPointsVietnam);
+            map.getSource('vietnam-points').setData(vietnamPoints);
+            const vietnamCells = turf.voronoi(vietnamPoints, {bbox: box});
+            map.getSource('vietnam-cells').setData(vietnamCells);
+        } else if (country === 'philippines') {
+            clickedPointsPhilippines.push(aPoint);
+            const philippinesPoints = turf.featureCollection(clickedPointsPhilippines);
+            map.getSource('philippines-points').setData(philippinesPoints);
+            const philippinesCells = turf.voronoi(philippinesPoints, {bbox: box});
+            map.getSource('philippines-cells').setData(philippinesCells);
+        }
+});
+
+
+});
+
+     
+    
+    
+
+    
+
+
+
+
+
+    </script>
+  </body>
+</html>
