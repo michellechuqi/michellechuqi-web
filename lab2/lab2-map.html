@@ -18,7 +18,8 @@
     <!-- div element for web map: -->
     <div id="mapid" style="width: 800px; height: 500px;"></div>
     <!-- div element for territory buttons -->
-    <div id="buttons" style="
+     <!-- knowledge of flexbox from: https://www.w3schools.com/css/css3_flexbox.asp -->
+    <div id="buttons" style=" 
         width: 800px;
         margin: 15px 0;
         display: flex;
@@ -63,12 +64,15 @@
       const clickedPointsVietnam = [];
       const clickedPointsPhilippines = [];
 
+     // make variable called country
      // before a button is clicked, country is null (= 'no country')
+     // let vs const from: https://www.freecodecamp.org/news/var-let-and-const-whats-the-difference/
       let country = null;
 
 // Wait for map style to load. Everything afterwards happens after style loads:
 map.on('load', function () {
     // China's layer is populated and has a style, prepares for fill view
+    // addLayer and addSource from: https://maplibre.org/maplibre-gl-js/docs/API/classes/Map/#addlayer
      map.addSource('china-cells', { 
         type: 'geojson',
         data: turf.featureCollection([]) // declare blank array
@@ -193,7 +197,7 @@ map.on('load', function () {
 // What happens when button is clicked (listeners, change in country value)
     document.getElementById('china-territory').addEventListener('click', function() {
         country = 'china';
-        console.log('China selected')
+        console.log('China selected') // able to verify in console that listener is working
     });
     document.getElementById('vietnam-territory').addEventListener('click', function() {
         country = 'vietnam';
@@ -211,8 +215,9 @@ map.on('load', function () {
             return;
         }
 
-        const aPoint = turf.point ([e.lngLat.lng, e.lngLat.lat], 
-                                   {country: country}); // make a property called countries
+        // point syntax from: https://turfjs.org/docs/api/point
+        const aPoint = turf.point([e.lngLat.lng, e.lngLat.lat], 
+                                  {country: country}); 
 
         if (country === 'china') {
             clickedPointsChina.push(aPoint); // populate array
@@ -229,7 +234,7 @@ map.on('load', function () {
 
 // Making one Voronoi diagram with all points (regardless of their separate country identities)
         const combinedArray = turf.featureCollection([
-            ...clickedPointsChina, // spread syntax (...) to make one array of all the points
+            ...clickedPointsChina, // spread syntax (...) to make one array of all the points from: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Spread_syntax
             ...clickedPointsVietnam,
             ...clickedPointsPhilippines
         ]);
