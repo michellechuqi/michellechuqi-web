@@ -1,6 +1,6 @@
-GEOS472: Research in Geography
-Exploratory Lab 2
-Michelle Huang (27444397)
+GEOS472: Research in Geography | 
+Exploratory Lab 2 | 
+Michelle Huang (27444397) | 
 November 2026
 
 # Title: Conflicting territories in the South China Sea
