@@ -37,7 +37,7 @@
       // Load MapLibre's code (JavaScript). Version 6 is loaded as a module, with import.
       import * as maplibregl from 'https://cdn.jsdelivr.net/npm/maplibre-gl@6.15.0/dist/maplibre-gl.mjs';
 
-// Setting up the map
+// Step 1: Setting up the map
       // the box that will hold the Voronoi cells: [west, south, east, north], in degrees.
       const box = [86.6, -14, 140.8, 31.3]; // bounds around South China Sea, from Google Maps
       // westmost lon: 86.6
@@ -57,7 +57,7 @@
       // a module keeps its names to itself. This line lets you type map in the console under the code.
       window.map = map;
 
-// Making arrays where new points are pushed into them
+// Step 2: Making arrays where new points are pushed into them
 
       // separate arrays for each of the three countries. 
       const clickedPointsChina = [];
@@ -69,7 +69,7 @@
      // let vs const from: https://www.freecodecamp.org/news/var-let-and-const-whats-the-difference/
       let country = null;
 
-// Wait for map style to load. Everything afterwards happens after style loads:
+// Step 3: Wait for map style to load. Everything afterwards happens after style loads:
 map.on('load', function () {
     // China's layer is populated and has a style, prepares for fill view
     // addLayer and addSource from: https://maplibre.org/maplibre-gl-js/docs/API/classes/Map/#addlayer
@@ -96,6 +96,7 @@ map.on('load', function () {
         },
         layout: {
             visibility: 'none' // this layer is initially hidden
+          // from: https://maplibre.org/maplibre-style-spec/layers/
         }
     });
     map.addSource('china-points', {
@@ -194,7 +195,7 @@ map.on('load', function () {
     });
     
 
-// What happens when button is clicked (listeners, change in country value)
+// Step 4: What happens when button is clicked (listeners, change in country value)
     document.getElementById('china-territory').addEventListener('click', function() {
         country = 'china';
         console.log('China selected') // able to verify in console that listener is working
@@ -208,7 +209,7 @@ map.on('load', function () {
         console.log('the Philippines selected')
     });
 
-// After clicking a button, clicking on a map pushes that point to an array:
+// Step 5: After clicking a button, clicking on a map pushes that point to an array:
     map.on('click', function(e) {
         if (country === null) { // to prevent clicking on map without clicking on a country first
             console.log('Click on a country button first.');
@@ -234,7 +235,7 @@ map.on('load', function () {
 
         console.log(country + ': ' + [e.lngLat.lng, e.lngLat.lat]); // console shows coordinates
 
-// Making one Voronoi diagram with all points (regardless of their separate country identities)
+// Step 6: Making one Voronoi diagram with all points (regardless of their separate country identities)
         const combinedArray = turf.featureCollection([
             ...clickedPointsChina, // spread syntax (...) to make one array of all the points from: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Spread_syntax
             ...clickedPointsVietnam,
@@ -242,7 +243,11 @@ map.on('load', function () {
         ]);
         const oneVoronoi = turf.voronoi(combinedArray, {bbox: box}); // make voronoi polygons
 
-// Preparation for filtering: making filter helper functions:
+// for steps 7-8: reviewing how filters work: https://www.w3schools.com/jsref/jsref_filter.asp
+      // I need to design filter functions that return a boolean value; .filter(filter-function)
+      // pushes an element into an array if filter-function returns true.
+
+// Step 7: Preparation for filtering: making filter helper functions:
         function checkChina(polygon, index) { // check each polygon if it belongs to china
             if (combinedArray.features[index].properties.country === 'china') {
                 return true};
@@ -259,7 +264,7 @@ map.on('load', function () {
             return false
         };
 
-// Separating resulting polygons by their country identities + updating sources
+// Step 8: Separating resulting polygons by their country identities + updating sources
         const chinaPolygons = turf.featureCollection(
             oneVoronoi.features.filter(checkChina));
         const vietnamPolygons = turf.featureCollection(
@@ -273,7 +278,7 @@ map.on('load', function () {
     
     });
 
-// Responding to toggle button
+// Step 9: Responding to toggle button
     let fillVisible = false;
     document.getElementById('toggle-fill').addEventListener('click', function() { // when button is clicked,
         if (fillVisible === false) { // if originally set to false,
