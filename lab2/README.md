@@ -21,6 +21,7 @@ Through turf.js' Voronoi polygons generation function, the territories extending
 
 ## Link to map
 https://michellechuqi.github.io/michellechuqi-web/lab2/lab2-map.html
+(Please enable Developper Mode to see full functionality!)
 
 ## Where to find source code
 https://raw.githubusercontent.com/michellechuqi/michellechuqi-web/main/lab2/lab2-map.html
