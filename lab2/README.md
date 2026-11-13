@@ -25,6 +25,12 @@ https://michellechuqi.github.io/michellechuqi-web/lab2/lab2-map.html
 ## Where to find source code
 https://raw.githubusercontent.com/michellechuqi/michellechuqi-web/main/lab2/lab2-map.html
 
+## Collaborations and reliance on other resources
+I did not peer-critique during the Lab 2 process.
+I used ChatGPT to give me keywords that concerned the code syntax that would do what I wanted it to do but didn't learn in class. I would then search up that keyword in online forums and coding tutorial web pages. This would include wanting a row of buttons --> ChatGPT says to look for "flexbox" --> I find flexbox syntax elsewhere online.
+Other instances:
+* line 76-192: I kept running into issues of the code running so I consulted AI to tell me, at a high-level, when to add a source versus when to add a layer.
+
 ## Reflective analysis
 I designed the map for an audience with some understanding of the South China Sea territorial dispute––more specifically, I assume that the audience knows about how the Spratly Islands is a contested feature. The map addresses the question of how claiming the Spratly Islands as either China's/Vietnam's/the Philippines' territory can change the delineation of that country's territory as a whole, if territorial bounds are calculated using Voronoi polygons.
   
