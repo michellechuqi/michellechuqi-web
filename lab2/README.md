@@ -28,8 +28,14 @@ https://raw.githubusercontent.com/michellechuqi/michellechuqi-web/main/lab2/lab2
 ## Collaborations and reliance on other resources
 I did not peer-critique during the Lab 2 process.
 I used ChatGPT to give me keywords that concerned the code syntax that would do what I wanted it to do but didn't learn in class. I would then search up that keyword in online forums and coding tutorial web pages. This would include wanting a row of buttons --> ChatGPT says to look for "flexbox" --> I find flexbox syntax elsewhere online.
-Other instances:
+Instances of AI and other online resources use:
 * line 76-192: I kept running into issues of the code running so I consulted AI to tell me, at a high-level, when to add a source versus when to add a layer.
+* line 213: I wrote out if (country === and didn't know what value to put to represent no value; I knew an empty string wouldn't work so I asked AI what value to use in this specific instance and it said null.
+* the .featureCollection wasn't combining the arrays as I wanted it to, because the elements were still in their own arrays. I asked "what key operator would make the elements of an array 'flat' rather than nested in their separate arrays?' and ChatGPT said to search up the 'spread operator'.
+* line 245-276: I knew I needed to filter elements and make new arrays, so I reviewed how filter() works. I confirmed with ChatGPT that turf.featureCollections implies a push.
+⋅⋅⋅⋅* line 247: I wrote the iteration as function checkChina(index) but it wasn't running, I sent the code through ChatGPT asking why. It said index is a number but what you're intending to pass are polygons, which would need another parameter. So I added polygons.
+* line 280: I knew my previous fill layers' visibility was set to none (see line 97) so I asked ChatGPT how to change that value, and it said to look up the ".setLayoutProperty" syntax.
+* line 290: I needed to change the button text so I asked ChatGPT what keyword I should use, and it said look up the syntax for ".textContent".
 
 ## Reflective analysis
 I designed the map for an audience with some understanding of the South China Sea territorial dispute––more specifically, I assume that the audience knows about how the Spratly Islands is a contested feature. The map addresses the question of how claiming the Spratly Islands as either China's/Vietnam's/the Philippines' territory can change the delineation of that country's territory as a whole, if territorial bounds are calculated using Voronoi polygons.
