@@ -220,6 +220,8 @@ map.on('load', function () {
                                   {country: country}); 
 
         if (country === 'china') {
+          // == versus === from https://stackoverflow.com/questions/359494/which-equals-operator-vs-should-be-used-in-javascript-comparisons
+          // honestly, I did === because it worked.
             clickedPointsChina.push(aPoint); // populate array
             map.getSource('china-points').setData(turf.featureCollection(clickedPointsChina)); // update points layer
         } else if (country === 'vietnam') {
